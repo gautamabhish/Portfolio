@@ -66,9 +66,9 @@ export default function BuildYourPerfectSite() {
 
   const totalPages = selectedPages.length + (customPages.trim() ? 1 : 0);
   const totalFeatures = selectedFeatures.length;
-  const totalPrice = (
-    basePrice + totalPages * pageCost + totalFeatures * featureCost
-  ).toFixed(2);
+//   const totalPrice = (
+//     basePrice + totalPages * pageCost + totalFeatures * featureCost
+//   ).toFixed(2);
    // right after you compute totalPages and totalFeatures
    const rawTotal = basePrice + totalPages * pageCost + totalFeatures * featureCost;
    const discountAmount = rawTotal >= 80 ? 20 : rawTotal>10?((5/100)*rawTotal):0;           // only give $20 off if subtotal ≥ $20

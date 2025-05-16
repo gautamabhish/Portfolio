@@ -35,7 +35,7 @@ export default function Services() {
   
 
   // free-form description state
-  const [description, setDescription] = useState("");
+//   const [description, setDescription] = useState("");
 
   // grid pulse
   const [pulsePoint, setPulsePoint] = useState<{ x: number; y: number } | null>(null);
@@ -47,10 +47,7 @@ export default function Services() {
     setPulsePoint({ x, y });
   };
 
-  const handleSubmit = () => {
-    alert("Thanks for sharing your vision! We'll be in touch soon.");
-    setDescription("");
-  };
+  
 
   return (
     <div
