@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import type { ChangeEvent as CE, FormEvent as FE } from "react";
 import { CheckCircle, PlusCircle } from "lucide-react";
-
+import { db } from "../utils/firebase";
+import { addDoc, collection } from "firebase/firestore";
 const websiteTypes = [
     "Discord Bot",
   "Personal Portfolio",
@@ -127,11 +128,36 @@ export default function BuildYourPerfectSite() {
     !phoneError &&
     !fileError;
 
-  const onSubmit = (e: FE<HTMLFormElement>) => {
+  const onSubmit = async (e: FE<HTMLFormElement>) => {
     e.preventDefault();
     if (!isFormValid) return;
     // submit logic here
-    alert("Quote request submitted! We'll be in touch soon.");
+    const data = {
+      websiteType,
+      designStyle,
+      colorPalette,
+      inspirationLinks,
+      selectedFeatures,
+      selectedPages,
+      customPages,
+      budget,
+      deliveryDate,
+      name,
+      email,
+      phone,
+      fileName: file?.name ?? null,
+      finalTotal,
+      timeStamp: new Date().toISOString(),
+    };
+    try {
+      await addDoc(collection(db, "services"), data);
+      alert("Message sent! 🚀");
+      
+    } catch (err) {
+      console.error("Firestore error:", err);
+      alert("Error sending message. Please try again.");
+    }
+   
   };
 
   // File preview URL for images

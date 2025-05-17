@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Mail, MapPin } from "lucide-react";
-
+import { db } from "../../utils/firebase";
+import { addDoc, collection } from "firebase/firestore";
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
 
@@ -9,10 +10,22 @@ export default function ContactPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    alert("Message sent! 🚀");
-    setFormData({ name: "", email: "", message: "" });
+
+    const data = {
+      ...formData,
+      timeStamp: new Date().toISOString(),
+    };
+
+    try {
+      await addDoc(collection(db, "contacts"), data);
+      alert("Message sent! 🚀");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (err) {
+      console.error("Firestore error:", err);
+      alert("Error sending message. Please try again.");
+    }
   };
 
   return (
