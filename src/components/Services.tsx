@@ -63,7 +63,7 @@ export default function Services() {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "radial-gradient(circle, rgba(0,183,255,0.15) 1px, transparent 1px)",
+            "radial-gradient(circle, rgba(0,183,255,0.8) 1px, transparent 1px)",
           backgroundSize: "20px 20px",
           filter: "blur(2px)",
           zIndex: 0,
@@ -93,18 +93,18 @@ export default function Services() {
       {/* blobs */}
       <div
         className="absolute rounded-full blur-xl opacity-70 bg-purple-400"
-        style={{ ...float, top: 120, left: 72, width: 40, height: 40, zIndex: 2 }}
+        style={{ ...float, top: 120, left: 72, width: 40, height: 40, zIndex: 4 }}
       />
       <div
         className="absolute rounded-full blur-lg opacity-60 bg-blue-500"
-        style={{ ...floatSlow, top: 80, right: 48, width: 24, height: 48, zIndex: 2 }}
+        style={{ ...floatSlow, top: 80, right: 48, width: 24, height: 48, zIndex: 4 }}
       />
 
       <div
         className="absolute rounded-full blur-lg opacity-70 bg-pink-400"
-        style={{ ...floatFast, bottom: 40, left: "50%", width: 72, height: 72, zIndex: 2 }}
+        style={{ ...floatFast, bottom: 40, left: "50%", width: 72, height: 72, zIndex: 4 }}
       />
-      <div  className="relative z-10">
+      <div  className="relative z-2">
 
           <ServiceChild
         

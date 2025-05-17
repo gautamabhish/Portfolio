@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
 const Navbar = () => {
   const borderKeyframes = `
     @keyframes borderMove {
@@ -22,23 +23,46 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className="flex justify-between items-center text-white px-6 py-4 ">
-      <div className="text-xl font-semibold tracking-wide hover:cursor-pointer">Abhishek Gautam</div>
+    <nav className="flex sm:justify-between justify-center  items-center text-white px-6 py-4 overflow-hidden">
+      {/* Logo */}
+      <div className="text-xl font-semibold tracking-wide hidden sm:block">
+        Abhishek Gautam
+      </div>
 
-      <ul className="flex space-x-6 text-white items-center hover:*:cursor:pointer">
-      <li className="cursor-pointer hover:text-[#5bece5] transition-colors duration-200">
-  <a href="#contact" >
-    Contact
-  </a>
-</li>
+      {/* Navigation Links */}
+      <ul className="flex space-x-6 items-center">
+        <li>
+          <a
+            href="#contact"
+            className="cursor-pointer hover:text-[#5bece5] transition-colors duration-200"
+          >
+            Contact
+          </a>
+        </li>
+        <li>
+          <a
+            href="#about"
+            className="cursor-pointer hover:text-[#5bece5] transition-colors duration-200"
+          >
+            About
+          </a>
+        </li>
+        <li>
+          <Link
+            to="/services"
+            className="cursor-pointer hover:text-[#5bece5] transition-colors duration-200"
+          >
+            Services
+          </Link>
+        </li>
 
-        <li className="cursor-pointer hover:text-[#5bece5] transition-colors duration-200"><a href="#about">About</a></li>
-        <li className="cursor-pointer hover:text-[#5bece5] transition-colors duration-200"> <Link to="/services">Services</Link></li>
-
-        {/* Animated border button */}
-        <li className="relative group py-3 px-4 rounded-2xl bg-[#1a1a1a] text-white font-medium overflow-hidden hover:cursor-pointer ">
-          <span className="relative z-10"><a href="#contact">Hire Me</a></span>
-          <div className="absolute inset-0 rounded-2xl p-[2px] z-0 animate-[borderMove_3s_linear_infinite] group-hover:animate-[borderMove_1s_linear_infinite]"
+        {/* Animated Border Button */}
+        <li className="relative group px-4 py-2 rounded-2xl bg-[#1a1a1a] text-white font-medium overflow-hidden cursor-pointer">
+          <span className="relative z-10">
+            <a href="#contact">Hire Me</a>
+          </span>
+          <div
+            className="absolute inset-0 rounded-2xl p-[2px] z-0 animate-[borderMove_3s_linear_infinite] group-hover:animate-[borderMove_1s_linear_infinite]"
             style={{
               backgroundImage: 'linear-gradient(270deg, #5bece5, #0077ff, #5bece5)',
               backgroundSize: '400% 400%',
@@ -51,7 +75,7 @@ const Navbar = () => {
           />
         </li>
       </ul>
-    </div>
+    </nav>
   );
 };
 

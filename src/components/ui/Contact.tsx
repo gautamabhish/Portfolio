@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Mail ,MapPin} from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
 
-  const handleChange = (e:any) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e:any) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     alert("Message sent! 🚀");
     setFormData({ name: "", email: "", message: "" });
@@ -33,7 +33,7 @@ export default function ContactPage() {
             <Phone className="text-[#ffce00]" /> +123 456 7890
           </p> */}
           <p className="flex items-center gap-3">
-            <MapPin className="text-[#ff4ecd]" /> Delhi, India 
+            <MapPin className="text-[#ff4ecd]" /> Delhi, India
           </p>
         </div>
       </div>
@@ -41,7 +41,7 @@ export default function ContactPage() {
       {/* Right: Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white/5 backdrop-blur-md p-8 rounded-2xl shadow-xl w-3xl max-w-4xl space-y-6"
+        className="bg-white/5 backdrop-blur-md p-8 rounded-2xl shadow-xl min-w-[60%]  max-w-4xl space-y-6"
       >
         <div>
           <label className="block mb-1 text-sm font-medium text-white">Name</label>
@@ -83,6 +83,8 @@ export default function ContactPage() {
           Send Message
         </button>
       </form>
+
+
 
       <style>{`
         @keyframes gradientBackground {

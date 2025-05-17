@@ -91,9 +91,9 @@ const HeroStatsMiddleSection = ({ data, platform, color }) => {
 
         {/* Player Score */}
         <div style={{ textAlign: "center", flex: 1 }}>
-          <div>
+          <a href={data.link} target="_blank" rel="noopener noreferrer">
             <img src={data.qrCode} alt="qr" />
-          </div>
+          </a>
           <div style={{ fontSize: "14px", color: "#94a3b8" }}>Visit Profile</div>
           <div style={{ fontSize: "12px", color: "#64748b" }}>&nbsp;</div>
         </div>
@@ -106,7 +106,7 @@ const HeroStatsMiddleSection = ({ data, platform, color }) => {
 export const GitHubStats = ({ data }) => {
   return (
     <HeroStatsMiddleSection
-      data={data}
+      data={{...data,link:"https://github.com/gautamabhish"}}
       platform="GitHub"
       color="rgb(96, 0, 119,0.6)" // optional color override
     />
@@ -117,7 +117,7 @@ export const GitHubStats = ({ data }) => {
 export const LeetCodeStats = ({ data }) => {
   return (
     <HeroStatsMiddleSection
-      data={data}
+      data={{...data,link:"https://leetcode.com/uUTmPQg4t3/"}}
       platform="LeetCode"
       color="rgb(96, 0, 119,0.6)" // optional color override
     />

@@ -11,6 +11,21 @@ interface Milestone {
   glow: string;
 }
 
+
+const float = {
+  animation: "float 6s ease-in-out infinite",
+};
+
+const floatSlow = {
+  animation: "floatSlow 12s ease-in-out infinite",
+};
+
+const floatFast = {
+  animation: "floatFast 4s ease-in-out infinite",
+};
+
+
+
 // Milestones array with correct typing
 const milestones: Milestone[] = [
   { title: "Python Foundations", description: "Started with print('Hello World')", glow: "#5bece5" },
@@ -43,7 +58,7 @@ export default function About() {
           scrollTrigger: {
             trigger: card,
             start: "top 90%",
-            end: "bottom 10%",
+            end: "top 10%",
             toggleActions: "play reverse play reverse",
             markers: false,
           },
@@ -69,6 +84,19 @@ export default function About() {
             Passionate developer and aspiring computer science engineer crafting immersive experiences and scalable solutions.
           </p>
         </div>
+        {/* Floating blobs */}
+        <div
+          className="absolute rounded-full blur-xl opacity-70 bg-purple-400"
+          style={{ ...float, top: "120px", left: "72px", width: "40px", height: "40px", zIndex: 2 }}
+        />
+        <div
+          className="absolute rounded-full blur-lg opacity-60 bg-blue-500"
+          style={{ ...floatSlow, top: "80px", right: "48px", width: "24px", height: "48px", zIndex: 2 }}
+        />
+        <div
+          className="absolute rounded-full blur-lg opacity-70 bg-emerald-400"
+          style={{ ...floatFast, bottom: "40px", left: "45%", width: "72px", height: "72px", zIndex: 2 }}
+        />
 
         {/* Milestones */}
         <div className="space-y-16 relative z-10">

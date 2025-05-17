@@ -72,7 +72,7 @@ export default function GUI() {
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage: "radial-gradient(circle, rgba(0, 183, 255, 0.15) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, rgba(0, 183, 255, 0.3) 1px, transparent 1px)",
             backgroundSize: "20px 20px",
             // opacity:80,
             filter: "blur(2px)",
