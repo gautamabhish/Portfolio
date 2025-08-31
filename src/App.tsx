@@ -2,7 +2,6 @@ import { ModeProvider, useModeContext } from "./providers/ModeProvider";
 import Terminal from "./pages/Terminal";
 import GUI from "./pages/GUI";
 import { BrowserRouter,Routes,Route } from "react-router-dom";
-import Services from "./components/Services";
 import { GUIThemeProvider } from "./providers/GUITheme";
 
 const AppContent = () => {

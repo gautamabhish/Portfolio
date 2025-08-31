@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+
 import { Sun, Moon } from 'lucide-react';
 import { useGUITheme } from '../../providers/GUITheme';
 

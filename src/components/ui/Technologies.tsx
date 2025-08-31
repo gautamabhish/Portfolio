@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useGUITheme } from '../../providers/GUITheme';
 
 const techImages = [
@@ -26,7 +26,7 @@ const Technologies = () => {
   const isDark = theme === 'dark';
 
   const containerBg = isDark ? 'bg-black' : 'bg-white';
-  const textColor = isDark ? 'text-white' : 'text-black';
+  // const textColor = isDark ? 'text-white' : 'text-black';
 
   return (
     <div
