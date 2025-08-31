@@ -1,7 +1,8 @@
 //@ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useGUITheme } from '../../providers/GUITheme';
-
+import { Github } from 'lucide-react';
+import { Radio as Live } from 'lucide-react';
 const phrases = [
   { verb: "Design"},
   { verb: "Develop" },
@@ -191,7 +192,7 @@ export default function Hero() {
                       rel="noopener noreferrer"
                       className="text-sm underline"
                     >
-                      Live
+                      <Live></Live>
                     </a>
                   )}
                   {MyProjects[currentProjectIndex!]?.github && (
@@ -201,7 +202,7 @@ export default function Hero() {
                       rel="noopener noreferrer"
                       className="text-sm underline"
                     >
-                      GitHub
+                  <Github></Github>
                     </a>
                   )}
                 </div>
