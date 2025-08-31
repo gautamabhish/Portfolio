@@ -1,210 +1,313 @@
 //@ts-nocheck
-import { useEffect, useState } from "react";
-import { GitHubStats, LeetCodeStats } from "./ProfileCard";
-import githubData from "../../../public/backup.github.json";
-import leetCodeData from "../../../public/backup.leetcode.json";
-import axios from "axios";
-const typingSpeed = 120;
-const pauseBetweenPhrases = 1600;
-
-
+import React, { useState, useEffect } from 'react';
+import { useGUITheme } from '../../providers/GUITheme';
 
 const phrases = [
-  { verb: "Design", phrase: "Sleek Interfaces" },
-  { verb: "Deliver", phrase: "Intuitive Experiences" },
-  { verb: "Develop", phrase: "Scalable Solutions" },
+  { verb: "Design"},
+  { verb: "Develop" },
+  { verb: "Deliver"},
 ];
 
-const floatFast = {
-  animation: "floatFast 4s ease-in-out infinite",
-};
-
-
-
-
 export default function Hero() {
+  const { theme } = useGUITheme();
   const [typedText, setTypedText] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [showFadeUp, setShowFadeUp] = useState(false);
   const [resetCycle, setResetCycle] = useState(false);
 
+  // Manual UI state
+  const [currentProjectIndex, setCurrentProjectIndex] = useState<number | null>(null); // index in MyProjects currently shown
+  const [showProjectDetails, setShowProjectDetails] = useState(false);
+  const [callStack, setCallStack] = useState<any[]>([]); // stack (manual)
+  const [eventQueue, setEventQueue] = useState<any[]>([]); // queue (manual)
 
+  const isDark = theme === 'dark';
 
-const GITHUB_API = "https://codeonbackend-txs4.onrender.com/github/gautamabhish";
-const LEETCODE_API = "https://codeonbackend-txs4.onrender.com/leetcode/uUTmPQg4t3";
+  const MyProjects = [
+    {
+      id: 1,
+      funcName: "showEdutrust()",
+      title: "Edutrust",
+      description:
+        "A full-featured quiz hosting platform enabling creators to design quizzes with video, audio, and image support. Includes role-based access, referral programs, and a community forum for engagement.",
+      tech: ["Next.js", "Node.js", "MySQL", "Express", "Prisma", "Razorpay"],
+      github: "https://github.com/gautamabhish/Skillpass",
+      link: "https://skillpass.vercel.app/",
+    },
+    {
+      id: 2,
+      funcName: "showCodeON()",
+      title: "CodeON",
+      description:
+        "A developer profile card generator integrating LeetCode, Codeforces, and GitHub scores with ranking and tier calculation. Implemented Kubernetes manifests, Helm charts, and multi-tier Dockerized deployments.",
+      tech: ["React.js", "Tailwind CSS", "Framer Motion", "MongoDB"],
+      github: "https://github.com/gautamabhish/codeON",
+      link: "https://code-on-one.vercel.app/",
+    },
+    {
+      id: 3,
+      funcName: "showDiscordBot()",
+      title: "AI Discord Bot",
+      description:
+        "An AI-powered Discord bot built with Grok SDK, designed to handle channel queries and provide intelligent responses in real-time.",
+      tech: ["discord.js", "Node.js", "grok-sdk"],
+      github: "https://github.com/gautamabhish/Discord-Bot-?tab=readme-ov-file",
+    },
+    {
+      id: 4,
+      funcName: "showEdutrustDevops()",
+      title: "Edutrust DevOps",
+      description:
+        "End-to-end DevOps deployment of the Edutrust platform on Minikube. Leveraged Docker, Kubernetes, Helm, ArgoCD, and Terraform for CI/CD, with added security using Trivy.",
+      tech: ["AWS", "Docker", "Kubernetes", "Helm", "ArgoCD", "Terraform", "Trivy"],
+      github: "https://github.com/gautamabhish/EdutrustDevops",
+    },
+  ];
 
-
-const [githubData, setGithubData] = useState({
-  "player": {
-    "_id": "67e834073d7f7dff59bb6d42",
-    "platform": "GitHub",
-    "playerId": "gautamabhish",
-    "__v": 0,
-    "name": "gautamabhish",
-    "score": 168
-  },
-  "problemSolvingScore": 0,
-  "overallScore": 168,
-  "ranking": {
-    "rank": 18,
-    "totalPlayers": 54
-  },
-  "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAYAAAB1PADUAAAAAklEQVR4AewaftIAAAV6SURBVO3BUYoESQ4FwaegD+ZH95tpfwULCUlF9UwPMstaa6211lprrbXWWmuttdZaa6211lpr/UdUPqR2fhFQGdTOAFS+SO08ACoP1M4DoDKonV8EVD5wstZFJ2tddLLWRT+5DKhcpHY+oHZeACqD2nkAVAa18wCofACoXKR2LjpZ66KTtS46Weuin3yZ2nkBqLwAVF4AKoPaGdTOB4DKA7XzAKi8oHZeACpfdLLWRSdrXXSy1kU/+ePUzgOgMqidAah8QO08ACoDUBnUzn/IyVoXnax10claF/3kjwMqg9oZ1M4LamcAKg+AyqB2HqidAaj8h5ysddHJWhedrHXRT74MqPwhQGVQOwNQeQBUXlA7A1B5Aaj8i5ysddHJWhedrHXRTy5TO79I7QxAZVA7A1AZ1M4AVF5QOwNQGdTOAFQGtfOC2vkXO1nropO1LjpZ66LKH6d2fhFQeaB2HgCVQe0MQOUPO1nropO1LjpZ66LKh9TOAFQGtfMAqAxq5wWgMqidAag8UDsvAJVB7XwAqDxQOwNQeaB2BqAyqJ0HQOUDJ2tddLLWRSdrXVT5kNp5AFQeqJ0HQGVQOwNQGdTOA6DyAbXzRUBlUDsvAJUX1M4AVD5wstZFJ2tddLLWRT+5DKg8UDsPgMqgdi5SOw+AyqB2HgCVQe08ACoP1M4AVAa1MwCVB2rnAVC56GSti07WuuhkrYsqX6Z2BqDyQO0MQOWB2nkAVAa1cxFQeaB2BqAyqJ0XgMqgdgag8oLaGYDKB07WuuhkrYtO1rqo8iG18wGg8kDtDEBlUDsPgMoXqZ0HQOUXqZ0HQOWLTta66GSti07WuqjyZWrnAVB5Qe28AFReUDsDUHlB7QxAZVA7A1B5oHYGoPKC2nkBqHzgZK2LTta66GSti35ymdp5Qe28AFReUDsPgMoAVAa1MwCVB0DlBbUzAJU/7GSti07WuuhkrYsqH1I7D4DKC2pnACqD2hmAyqB2BqDygtoZgMqgdgag8oLa+SKg8kDtDEDlopO1LjpZ66KTtS6qfEjtDEBlUDsDUHlB7QxAZVA7FwGVi9TOC0DlBbXzAKgMamcAKhedrHXRyVoXnax1UeUytTMAlUHtDEBlUDsDUHmgdgag8gG1MwCVfxG1MwCVQe28AFQuOlnropO1LjpZ66LKh9TOAFQGtTMAlUHtDEBlUDsDUHmgdl4AKhepnQdAZVA7A1AZ1M4LQGVQOwNQ+aKTtS46Weuik7UuqnyZ2vkAUHmgdh4AlUHtPAAqD9TOC0DlA2rnBaAyqJ0BqHzRyVoXnax10claF1UuUzsPgMqgdgagMqidF4DKC2rnAVAZ1M4HgMqgdn4RUPmik7UuOlnropO1Lqr8cWrnHwRUBrXzAKgMamcAKi+onYuAygdO1rroZK2LTta66CcfUju/CKh8AKg8UDsDUPkAUBnUzgtqZwAqLwCVQe0MQOWik7UuOlnropO1LvrJZUDlIrXzAlB5oHYGoDIAlRfUzgBUHgCVQe08ACp/yMlaF52sddHJWhf95MvUzgtA5QWgMqidi9TOAFQGoDKonQGovKB2PgBUBrUzAJVB7QxA5QMna110stZFJ2td9JM/Tu08ACovqJ0HaucBUHmgdgagMqidAagMaueB2hmAyqB2BqBy0claF52sddHJWhf95D8GqLygdgag8kVAZVA7A1B5Aag8UDsDUBnUzgBUPnCy1kUna110stZFP/kyoPJFQOUitfMAqHyR2hmAygtqZwAqg9oZgMpFJ2tddLLWRSdrXfSTy9TOL1I7HwAqg9oZgMoDtTMAlUHtfEDtDEDlAVD5B52sddHJWhedrLXWWmuttdZaa6211lprrbXWWmuttdZa6//8D2M7tKFbPH8HAAAAAElFTkSuQmCC",
-  "color": "linear-gradient(65deg,rgba(192, 192, 192, 0.8), #A8A8A8, #E0E0E0,#b0b0b0)"
-});
-const [leetcodeData, setLeetcodeData] = useState({
-  "player": {
-    "_id": "67ea86773d7f7dff59bbbd63",
-    "playerId": "uUTmPQg4t3",
-    "platform": "LeetCode",
-    "__v": 0,
-    "name": "uUTmPQg4t3",
-    "score": 58
-  },
-  "ranking": {
-    "rank": 18,
-    "totalPlayers": 40
-  },
-  "problemSolvingScore": 82,
-  "overallScore": 58,
-  "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAYAAAB1PADUAAAAAklEQVR4AewaftIAAAVRSURBVO3BUQokyREFwRdJH9CP6jcM/QYIChWdPasdwixrrbXWWmuttdZaa6211lprrbXWWmut9ZeofEnt/EFA5QW18wCovKB2HgCVF9TOAFQGtfMHAZUvnKx10claF52sddEnlwGVi9TOF4DKoHYGtTMAlQdA5R8EVC5SOxedrHXRyVoXnax10Sc/pnZeACovqJ0XgMqgdh6onQGoDGpnACp/kNp5Aaj80MlaF52sddHJWhd98pcBKg/UzgBUHgCV9T87Weuik7UuOlnrok/+MmrnAVAZ1M4XgMoLaucvdrLWRSdrXXSy1kWf/BhQ+YOAyqB2fkjtDEDlAVAZ1M4XgMr/kZO1LjpZ66KTtS765DK18y8GVAa1MwCVQe08UDsDUPmC2vk/drLWRSdrXXSy1kWffAmo/EXUzgBUBrUzAJUX1M4LQOVf5GSti07WuuhkrYs++ZLaGYDKoHYuAioDULkIqAxq5wW1MwCVQe0MQOWB2rkIqPzQyVoXnax10claF31ymdp5AagMamcAKoPaGYDKDwGVQe0MaueB2nlB7XwBqLygdgag8oWTtS46Weuik7Uu+uQyoDKonS+onQdqZwAqPwRULlI7D4DKA7XzBaBy0claF52sddHJWhd98iWg8kNAZVA7LwCVB0DlgdoZgMqgdgag8gWgMqidF9TOAFQGtTMAlYtO1rroZK2LTta6qPKHqZ0BqDxQOwNQGdTOAFQGtfMCUHlB7QxA5YHaGYDKC2pnACqD2nkAVH7oZK2LTta66GStiyqXqZ0HQOUitfMAqDxQO18AKi+onR8CKi+onQGofOFkrYtO1rroZK2LKv8wtTMAlUHtDEDlgdp5AFQeqJ0vAJVB7QxAZVA7A1AZ1M5FQOWHTta66GSti07WuuiTL6mdB0BlUDsP1M4AVAa1MwCVHwIqg9oZgMoLaueHgMoDtTMAlYtO1rroZK2LTta6qPIltfMCUHmgdl4AKg/UzgBUBrUzAJVB7TwAKi+onQGoXKR2HgCVHzpZ66KTtS46WeuiT34MqAxqZwAqD4DKA7UzAJUBqHwBqAxqZ1A7A1B5Qe1cBFQGtfNA7QxA5Qsna110stZFJ2tdVPmS2hmAyqB2LgIqD9TOC0Dlh9TOAFQGtTMAlQdq5wFQGdTOAFR+6GSti07WuuhkrYs++TGg8oLaGYDKA7XzAlAZ1M4AVAa1MwCVQe0MQGUAKoPaGYDKoHYGoPIFoDKonQGoXHSy1kUna110stZFlS+pnQGoDGrnDwIqD9TOAFQuUjsDUHmgdi4CKoPaeQGofOFkrYtO1rroZK2LKv9yaucBUBnUzgBUBrXzAlB5oHYGoDKonQGovKB2LgIqXzhZ66KTtS46WeuiypfUzh8EVB6onQGoPFA7PwRUBrXzAKgMamcAKoPaeQGo/NDJWhedrHXRyVoXfXIZULlI7TxQOwNQeQGoDGpnACr/IKDyAlB5Qe0MQOULJ2tddLLWRSdrXfTJj6mdF4DKF9TOAFQGtTMAlQGoDGrnIqAyqJ1B7Vykdgag8kMna110stZFJ2td9MlfBqgMaueB2hmAygBU/iCg8gW18wJQuehkrYtO1rroZK2LPvnLAZVB7TxQOy8AlRfUzgO180NqZwAqF52sddHJWhedrHXRJz8GVH4IqAxq5wFQeaB2XlA7A1AZ1M4AVAa1MwCVF9TOA6AyqJ0fOlnropO1LjpZ66LKl9TOHwRUBrUzAJVB7TwAKoPaGYDKoHZeACoXqZ0BqDxQOwNQ+aGTtS46Weuik7XWWmuttdZaa6211lprrbXWWmuttdZaa/2X/wDqiZN+Nb3xcQAAAABJRU5ErkJggg==",
-  "color": "linear-gradient(65deg,#3282cd,rgba(139, 89, 43, 0.77),#999c9c,#304b61)"
-});
-
-const fetchWithFallback = async (url: string, fallbackPath: string) => {
-  try {
-    const res = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      timeout: 5000, // 5 seconds timeout
-    });
-    if (!res.ok) throw new Error("API error");
-    return await res.json();
-  } catch (err) {
-    console.warn(`⚠️ Fetch failed: ${url}. Falling back to ${fallbackPath}`);
-    const fallbackRes = await fetch(fallbackPath);
-    return await fallbackRes.json();
-  }
-};
-
-useEffect(() => {
-  const loadData = async () => {
-    const github = await fetchWithFallback(GITHUB_API, "/backup.github.json");
-    const leetcode = await fetchWithFallback(LEETCODE_API, "/backup.leetcode.json");
-    setGithubData(github);
-    setLeetcodeData(leetcode);
-  };
-
-  loadData();
-}, []);
+  // Typing animation (unchanged)
   useEffect(() => {
+    const currentPhrase = phrases[phraseIndex];
+    const fullText = `${currentPhrase.verb}`;
+
     if (resetCycle) {
       setTypedText("");
       setCharIndex(0);
-      setPhraseIndex(0);
-      setShowFadeUp(false);
       setResetCycle(false);
       return;
     }
-    if (phraseIndex >= phrases.length) {
-      setResetCycle(true);
-      return;
-    }
 
-    const currentVerb = phrases[phraseIndex].verb;
-    if (charIndex <= currentVerb.length) {
-      const t = setTimeout(() => {
-        setTypedText(currentVerb.slice(0, charIndex));
-        setCharIndex((c) => c + 1);
-      }, typingSpeed);
-      return () => clearTimeout(t);
+    if (charIndex < fullText.length) {
+      const timer = setTimeout(() => {
+        setTypedText(fullText.slice(0, charIndex + 1));
+        setCharIndex(charIndex + 1);
+      }, 100);
+      return () => clearTimeout(timer);
     } else {
-      const t = setTimeout(() => setShowFadeUp(true), pauseBetweenPhrases);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => {
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+        setResetCycle(true);
+      }, 1800);
+      return () => clearTimeout(timer);
     }
   }, [charIndex, phraseIndex, resetCycle]);
 
+  // Fade-in
   useEffect(() => {
-    if (!showFadeUp) return;
-    const t = setTimeout(() => {
-      setShowFadeUp(false);
-      setCharIndex(0);
-      setPhraseIndex((i) => i + 1);
-    }, 2200);
-    return () => clearTimeout(t);
-  }, [showFadeUp]);
+    const timer = setTimeout(() => setShowFadeUp(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ---------- Manual flow handlers ----------
+
+  // Add a project to the manual queue (user click)
+  const handleProjectClick = (index: number) => {
+    const project = MyProjects[index];
+    if (!eventQueue.some(p => p.id === project.id) && !callStack.some(p => p.id === project.id)) {
+      setEventQueue(prev => [...prev, project]);
+    }
+  };
+
+  // Execute next queued project (manual)
+ useEffect( () => {
+    if (eventQueue.length === 0 ||callStack.length!==0) return;
+    const next = eventQueue[0];
+    setEventQueue(prev => prev.slice(1)); // remove from queue
+    setCallStack([next]); // push to stack (replace current)
+    const idx = MyProjects.findIndex(p => p.id === next.id);
+    setCurrentProjectIndex(idx >= 0 ? idx : null);
+    setShowProjectDetails(true);
+  },[callStack,eventQueue]);
+
+  // Close current project and return to default (your info)
+  const closeCurrentProject = () => {
+    setCallStack([]);
+    setShowProjectDetails(false);
+    setCurrentProjectIndex(null);
+  };
+
+  const themeClasses = isDark ? 'bg-black text-white' : 'bg-white text-black';
+  const accentColor = isDark ? 'text-gray-300' : 'text-gray-700';
+  const borderColor = isDark ? 'border-gray-800' : 'border-gray-200';
+  const stackColor = isDark ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-300';
+  const queueColor = isDark ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-400';
 
   return (
-    <section className="min-h-screen flex flex-col justify-center items-center px-6 md:px-12 overflow-visible text-white relative">
-      <div className="flex items-center space-x-4 mb-4">
-        <h1
-          className="text-center text-transparent font-bold leading-tight bg-clip-text bg-[url(/Paper.jpg)] hero-outline"
-          style={{
-            fontFamily: "Bebas Neue, serif",
-            fontSize: "clamp(4rem, 20vw, 8rem)",
-            WebkitTextStroke: "2px rgba(255, 255, 255, 0.6)",
-          }}
-        >
-          {typedText}
-        </h1>
-        <span className="blinking-cursor text-5xl md:text-6xl">|</span>
+    <div className={`min-h-screen ${themeClasses} transition-colors duration-300`}>
+      <div className="flex h-screen">
+        {/* Left Side - Name/Project Details */}
+        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16">
+          <div className={`transition-opacity duration-700 ${showFadeUp ? 'opacity-100' : 'opacity-0'}`}>
+            {!showProjectDetails ? (
+              <>
+                <h2 className="text-4xl lg:text-6xl font-light mb-2 tracking-tight font-mono ml-8">
+                  ABHISHEK GAUTAM
+                </h2>
+                <div className="h-16 mb-6 ml-8">
+                  <p className={`text-2xl lg:text-3xl font-light font-mono ${accentColor} min-h-[3rem]`}>
+                    {typedText}
+                    <span className="animate-pulse">{/* cursor */}|</span>
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div
+                className={`transition-all duration-500 transform ${
+                  showProjectDetails ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                }`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-3xl lg:text-5xl font-semibold tracking-tight">
+                    {MyProjects[currentProjectIndex!]?.title}
+                  </h3>
+                  <button
+                    aria-label="Close project"
+                    onClick={closeCurrentProject}
+                    className="ml-4 px-3 py-1 rounded-full hover:bg-red-600 hover:text-red-500 text-white transition"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <p className={`text-lg lg:text-xl font-light leading-relaxed mb-6 ${accentColor}`}>
+                  {MyProjects[currentProjectIndex!]?.description}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {MyProjects[currentProjectIndex!]?.tech?.map((tech, index) => (
+                    <span
+                      key={index}
+                      className={`px-3 py-1 border ${borderColor} rounded-md text-sm font-mono ${accentColor} bg-opacity-50`}
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                {/* Optional links */}
+                <div className="mt-6 flex gap-3">
+                  {MyProjects[currentProjectIndex!]?.link && (
+                    <a
+                      href={MyProjects[currentProjectIndex!].link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm underline"
+                    >
+                      Live
+                    </a>
+                  )}
+                  {MyProjects[currentProjectIndex!]?.github && (
+                    <a
+                      href={MyProjects[currentProjectIndex!].github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm underline"
+                    >
+                      GitHub
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side - Manual Queue/Stack Visualization */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          {/* Call Stack */}
+          <div className="w-full max-w-sm mb-6">
+            <h4 className={`text-lg font-mono mb-4 ${accentColor} text-center`}>Call Stack</h4>
+            <div className={`h-32 border-2 ${stackColor} rounded-lg p-4 flex flex-col justify-end transition-all duration-300 w-full`}>
+              {callStack.length > 0 ? (
+                callStack.map((project) => (
+                  <div
+                    key={`stack-${project.id}`}
+                    className={`p-3 mb-2 rounded border-l-4 text-sm font-mono transition-all duration-300 ${
+                      isDark ? 'bg-red-900 border-red-400 text-red-100' : 'bg-red-100 border-red-500 text-red-800'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>{project.funcName}</div>
+                      <button
+                        onClick={() => { setCallStack([]); setShowProjectDetails(false); setCurrentProjectIndex(null); }}
+                        className="text-xs px-2  rounded hover:bg-red-600 bg-transparent hover:text-red-800 text-white transition"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className={`text-center ${accentColor} font-mono text-sm`}>Stack Empty </div>
+              )}
+            </div>
+          </div>
+
+          {/* Event Loop Arrow / label */}
+          <div className="mb-6 flex items-center">
+            <div className={`w-16 h-0.5 ${isDark ? 'bg-yellow-400' : 'bg-blue-500'} relative`}>
+              <div className={`absolute right-0 w-2 h-2 ${isDark ? 'bg-yellow-400' : 'bg-blue-500'} transform rotate-45 translate-x-1 -translate-y-0.5`} />
+            </div>
+            <span className={`mx-4 text-sm font-mono ${accentColor}`}>Projects</span>
+            <div className={`w-16 h-0.5 ${isDark ? 'bg-yellow-400' : 'bg-blue-500'} relative`}>
+              <div className={`absolute right-0 w-2 h-2 ${isDark ? 'bg-yellow-400' : 'bg-blue-500'} transform rotate-45 translate-x-1 -translate-y-0.5`} />
+            </div>
+          </div>
+
+          {/* Event Queue */}
+          <div className="w-full max-w-sm mb-6">
+            <h4 className={`text-lg font-mono mb-4 ${accentColor} text-center`}>Project Queue</h4>
+            <div className={`h-32 border-2 ${queueColor} rounded-lg p-4 overflow-y-auto transition-all duration-300`}>
+              {eventQueue.length > 0 ? (
+                eventQueue.map((project, index) => (
+                  <div
+                    key={`queue-${project.id}`}
+                    className={`p-3 mb-2 rounded border-l-4 text-sm font-mono transition-all duration-300 ${
+                      isDark ? 'bg-green-900 border-green-400 text-green-100' : 'bg-green-100 border-green-500 text-green-800'
+                    }`}
+                    style={{ transform: `translateX(${index * 2}px)`, zIndex: eventQueue.length - index }}
+                  >
+                    {project.funcName}
+                  </div>
+                ))
+              ) : (
+                <div className={`text-center ${accentColor} font-mono text-sm`}>Queue Empty</div>
+              )}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex flex-col items-center gap-3">
+           
+
+            {/* Project selector */}
+            <div className="grid grid-cols-2 gap-2 mt-4 w-full max-w-sm text-white">
+              {MyProjects.map((project, index) => {
+                const inQueue = eventQueue.some(p => p.id === project.id);
+                const inStack = callStack.some(p => p.id === project.id);
+                return (
+                  <button
+                    key={project.id}
+                    onClick={() => handleProjectClick(index)}
+                    disabled={inQueue || inStack}
+                    className={` rounded border text-xs font-mono transition-all duration-200  ${
+                      inStack
+                        ? `${isDark ? 'bg-red-900 border-red-600 text-red-200' : 'bg-red-100 border-red-400 text-red-700'} cursor-not-allowed`
+                        : inQueue
+                        ? `${isDark ? 'bg-green-900 border-green-600 text-green-200' : 'bg-green-100 border-green-400 text-green-700'} cursor-not-allowed`
+                        : `${borderColor} hover:scale-105 cursor-pointer ${isDark ? 'hover:border-gray-600' : 'hover:border-gray-400'}`
+                    }`}
+                  >
+                    {project.funcName}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={`mt-4 text-xs font-mono ${accentColor} text-center`}>
+            Click a project to View.
+          </div>
+        </div>
       </div>
-      <div
-          className="absolute rounded-full blur-lg opacity-70 bg-rose-400"
-          style={{ ...floatFast, bottom: "50px", right: "25%", width: "72px", height: "72px", zIndex: 2 }}
-        />
-
-
-      {/* Fade-up phrase */}
-      {/* {showFadeUp && (
-        <p
-          key={phrases[phraseIndex].phrase}
-          className="text-2xl md:text-4xl font-semibold fade-up text-center bg-[rgba(248,255,188,0.96)] bg-clip-text text-transparent"
-          style={{ fontFamily: "Roboto, Inter" }}
-        >
-          {phrases[phraseIndex].phrase}
-        </p>
-      )} */}
-
-<div className="flex flex-col md:flex-row items-center justify-center gap-8 mt-16 ">
-{githubData && <GitHubStats data={githubData} />}
-{leetcodeData && <LeetCodeStats data={leetcodeData} />}
-</div>
-
-      {/* Stats Badges */}
- 
-      <style>{`
-        @keyframes fadeUp {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.8s ease-out; }
-
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-        .blinking-cursor {
-          animation: blink 1s step-end infinite;
-          font-weight: 900;
-          color: #5bece5;
-        }
-
-        .hero-outline {
-          background-size: 600% 600%;
-          animation: outlineGradientMove 7s ease-in-out infinite;
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-        }
-        @keyframes outlineGradientMove {
-          0% { background-position: 0% 50%; }
-          90% { background-position: 90% 50%; }
-          100% { background-position: 100% 50%; }
-        }
-      `}</style>
-    </section>
+    </div>
   );
 }

@@ -3,11 +3,12 @@ import Terminal from "./pages/Terminal";
 import GUI from "./pages/GUI";
 import { BrowserRouter,Routes,Route } from "react-router-dom";
 import Services from "./components/Services";
+import { GUIThemeProvider } from "./providers/GUITheme";
 
 const AppContent = () => {
   const { mode } = useModeContext();
 
-  return mode === "terminal" ? <Terminal /> : <GUI />;
+  return mode === "terminal" ? <Terminal /> : <GUIThemeProvider><GUI /></GUIThemeProvider>;
 };
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
       <BrowserRouter>
       <Routes>
         <Route path="/" element={<AppContent/>}></Route>
-        <Route path="/services" element={<Services/>}></Route>
+        {/* <Route path="/services" element={<Services/>}></Route> */}
       </Routes>
       </BrowserRouter>
       </ModeProvider>
