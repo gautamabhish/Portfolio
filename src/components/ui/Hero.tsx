@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useGUITheme } from '../../providers/GUITheme';
 import { Github } from 'lucide-react';
 import { Radio as Live } from 'lucide-react';
+
 const phrases = [
   { verb: "Design"},
   { verb: "Develop" },
@@ -18,10 +19,10 @@ export default function Hero() {
   const [resetCycle, setResetCycle] = useState(false);
 
   // Manual UI state
-  const [currentProjectIndex, setCurrentProjectIndex] = useState<number | null>(null); // index in MyProjects currently shown
+  const [currentProjectIndex, setCurrentProjectIndex] = useState<number | null>(null);
   const [showProjectDetails, setShowProjectDetails] = useState(false);
-  const [callStack, setCallStack] = useState<any[]>([]); // stack (manual)
-  const [eventQueue, setEventQueue] = useState<any[]>([]); // queue (manual)
+  const [callStack, setCallStack] = useState<any[]>([]);
+  const [eventQueue, setEventQueue] = useState<any[]>([]);
 
   const isDark = theme === 'dark';
 
@@ -66,7 +67,7 @@ export default function Hero() {
     },
   ];
 
-  // Typing animation (unchanged)
+  // Typing animation
   useEffect(() => {
     const currentPhrase = phrases[phraseIndex];
     const fullText = `${currentPhrase.verb}`;
@@ -99,29 +100,36 @@ export default function Hero() {
     return () => clearTimeout(timer);
   }, []);
 
-  // ---------- Manual flow handlers ----------
-
-  // Add a project to the manual queue (user click)
+  // Mobile: Direct project handling without event loop
   const handleProjectClick = (index: number) => {
+    setCurrentProjectIndex(index);
+    setShowProjectDetails(true);
+  };
+
+  const closeCurrentProject = () => {
+    setShowProjectDetails(false);
+    setCurrentProjectIndex(null);
+  };
+
+  // Desktop: Keep original event loop behavior
+  const handleProjectClickDesktop = (index: number) => {
     const project = MyProjects[index];
     if (!eventQueue.some(p => p.id === project.id) && !callStack.some(p => p.id === project.id)) {
       setEventQueue(prev => [...prev, project]);
     }
   };
 
-  // Execute next queued project (manual)
- useEffect( () => {
-    if (eventQueue.length === 0 ||callStack.length!==0) return;
+  useEffect(() => {
+    if (eventQueue.length === 0 || callStack.length !== 0) return;
     const next = eventQueue[0];
-    setEventQueue(prev => prev.slice(1)); // remove from queue
-    setCallStack([next]); // push to stack (replace current)
+    setEventQueue(prev => prev.slice(1));
+    setCallStack([next]);
     const idx = MyProjects.findIndex(p => p.id === next.id);
     setCurrentProjectIndex(idx >= 0 ? idx : null);
     setShowProjectDetails(true);
-  },[callStack,eventQueue]);
+  }, [callStack, eventQueue]);
 
-  // Close current project and return to default (your info)
-  const closeCurrentProject = () => {
+  const closeCurrentProjectDesktop = () => {
     setCallStack([]);
     setShowProjectDetails(false);
     setCurrentProjectIndex(null);
@@ -135,7 +143,115 @@ export default function Hero() {
 
   return (
     <div className={`min-h-screen ${themeClasses} transition-colors duration-300`}>
-      <div className="flex h-screen">
+      {/* Mobile Layout */}
+    <div className="block lg:hidden">
+  <div className="min-h-screen flex flex-col justify-center px-6 py-8">
+    <div className={`transition-opacity duration-700 ${showFadeUp ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Mobile Header */}
+      <h2 className="text-3xl md:text-4xl font-light mb-2 tracking-tight font-mono text-center">
+        ABHISHEK GAUTAM
+      </h2>
+      <div className="h-12 mb-8 text-center">
+        <p className={`text-xl md:text-2xl font-light font-mono ${accentColor}`}>
+          {typedText}
+          <span className="animate-pulse">|</span>
+        </p>
+      </div>
+
+      {/* Projects List */}
+      <div className="space-y-4">
+        <h3 className={`text-lg font-mono ${accentColor} text-center mb-6`}>Projects</h3>
+        <div className="flex flex-col gap-4">
+          {MyProjects.map((project, index) => {
+            const isOpen = currentProjectIndex === index && showProjectDetails;
+            return (
+              <div
+                key={project.id}
+                className={`overflow-hidden rounded-lg border ${borderColor} transition-all duration-500 ${
+                  isOpen
+                    ? `${isDark ? 'bg-gray-900' : 'bg-gray-50'} shadow-lg`
+                    : `${isDark ? 'bg-gray-900' : 'bg-gray-50'}`
+                }`}
+              >
+                <button
+                  onClick={() => {
+                    if (isOpen) {
+                      closeCurrentProject();
+                    } else {
+                      setCurrentProjectIndex(index);
+                      setShowProjectDetails(true);
+                    }
+                  }}
+                  className="w-full p-4 text-left flex justify-between items-center"
+                >
+                  <div>
+                    <h4 className={`${isDark?'text-white':'text-white'} text-lg font-semibold mb-1`}>{project.title}</h4>
+                    {!isOpen && (
+                      <p className={`text-[#ffecec] text-sm ${accentColor} line-clamp-2 `}>
+                        {project.description.substring(0, 100)}...
+                      </p>
+                    )}
+                  </div>
+                  <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-45' : 'rotate-0'}`}>
+                    +
+                  </div>
+                </button>
+
+                {/* Full Reveal Details */}
+                <div
+                  className={`transition-all duration-500 px-4 pb-4 ${
+                    isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <p className={`text-base leading-relaxed mt-2 ${accentColor}`}>{project.description}</p>
+
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {project.tech.map((tech, techIndex) => (
+                      <span
+                        key={techIndex}
+                        className={`px-3 py-1 border ${borderColor} rounded-md text-sm font-mono ${accentColor}`}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    {project.link && (
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm underline"
+                      >
+                        <Live size={16} />
+                      </a>
+                    )}
+                    {project.github && (
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm underline"
+                      >
+                        <Github size={16} />
+                        
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      {/* Desktop Layout - Original Event Loop Design */}
+      <div className="hidden lg:flex h-screen">
         {/* Left Side - Name/Project Details */}
         <div className="flex-1 flex flex-col justify-center px-8 lg:px-16">
           <div className={`transition-opacity duration-700 ${showFadeUp ? 'opacity-100' : 'opacity-0'}`}>
@@ -147,7 +263,7 @@ export default function Hero() {
                 <div className="h-16 mb-6 ml-8">
                   <p className={`text-2xl lg:text-3xl font-light font-mono ${accentColor} min-h-[3rem]`}>
                     {typedText}
-                    <span className="animate-pulse">{/* cursor */}|</span>
+                    <span className="animate-pulse">|</span>
                   </p>
                 </div>
               </>
@@ -158,12 +274,11 @@ export default function Hero() {
                 }`}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-3xl lg:text-5xl font-semibold tracking-tight">
+                  <h3 className="text-3xl lg:text-5xl font-semibold tracking-tight ">
                     {MyProjects[currentProjectIndex!]?.title}
                   </h3>
                   <button
-                    aria-label="Close project"
-                    onClick={closeCurrentProject}
+                    onClick={closeCurrentProjectDesktop}
                     className="ml-4 px-3 py-1 rounded-full hover:bg-red-600 hover:text-red-500 text-white transition"
                   >
                     ×
@@ -183,7 +298,6 @@ export default function Hero() {
                     </span>
                   ))}
                 </div>
-                {/* Optional links */}
                 <div className="mt-6 flex gap-3">
                   {MyProjects[currentProjectIndex!]?.link && (
                     <a
@@ -192,7 +306,7 @@ export default function Hero() {
                       rel="noopener noreferrer"
                       className="text-sm underline"
                     >
-                      <Live></Live>
+                      <Live />
                     </a>
                   )}
                   {MyProjects[currentProjectIndex!]?.github && (
@@ -202,7 +316,7 @@ export default function Hero() {
                       rel="noopener noreferrer"
                       className="text-sm underline"
                     >
-                  <Github></Github>
+                      <Github />
                     </a>
                   )}
                 </div>
@@ -211,7 +325,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right Side - Manual Queue/Stack Visualization */}
+        {/* Right Side - Event Loop Visualization (Desktop Only) */}
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           {/* Call Stack */}
           <div className="w-full max-w-sm mb-6">
@@ -229,7 +343,7 @@ export default function Hero() {
                       <div>{project.funcName}</div>
                       <button
                         onClick={() => { setCallStack([]); setShowProjectDetails(false); setCurrentProjectIndex(null); }}
-                        className="text-xs px-2  rounded hover:bg-red-600 bg-transparent hover:text-red-800 text-white transition"
+                        className="text-xs px-2 rounded hover:bg-red-600 bg-transparent hover:text-red-800 text-white transition"
                       >
                         ×
                       </button>
@@ -237,12 +351,12 @@ export default function Hero() {
                   </div>
                 ))
               ) : (
-                <div className={`text-center ${accentColor} font-mono text-sm`}>Stack Empty </div>
+                <div className={`text-center ${accentColor} font-mono text-sm`}>Stack Empty</div>
               )}
             </div>
           </div>
 
-          {/* Event Loop Arrow / label */}
+          {/* Event Loop Arrow */}
           <div className="mb-6 flex items-center">
             <div className={`w-16 h-0.5 ${isDark ? 'bg-yellow-400' : 'bg-blue-500'} relative`}>
               <div className={`absolute right-0 w-2 h-2 ${isDark ? 'bg-yellow-400' : 'bg-blue-500'} transform rotate-45 translate-x-1 -translate-y-0.5`} />
@@ -275,11 +389,8 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Controls */}
+          {/* Desktop Controls */}
           <div className="flex flex-col items-center gap-3">
-           
-
-            {/* Project selector */}
             <div className="grid grid-cols-2 gap-2 mt-4 w-full max-w-sm text-white">
               {MyProjects.map((project, index) => {
                 const inQueue = eventQueue.some(p => p.id === project.id);
@@ -287,9 +398,9 @@ export default function Hero() {
                 return (
                   <button
                     key={project.id}
-                    onClick={() => handleProjectClick(index)}
+                    onClick={() => handleProjectClickDesktop(index)}
                     disabled={inQueue || inStack}
-                    className={` rounded border text-xs font-mono transition-all duration-200  ${
+                    className={`rounded border text-xs font-mono transition-all duration-200 ${
                       inStack
                         ? `${isDark ? 'bg-red-900 border-red-600 text-red-200' : 'bg-red-100 border-red-400 text-red-700'} cursor-not-allowed`
                         : inQueue
