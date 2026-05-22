@@ -43,7 +43,7 @@ const Navbar = () => {
           }`}
         >
           <span className="relative z-10">
-            <a href="#contact">Hire Me</a>
+            <a href="#contact">Resume</a>
           </span>
           <div
             className="absolute inset-0 rounded-2xl p-[2px] z-0 animate-[borderMove_3s_linear_infinite] group-hover:animate-[borderMove_1s_linear_infinite]"
